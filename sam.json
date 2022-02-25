@@ -1,7 +1,7 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Transform": "AWS::Serverless-2016-10-31",
-  "Description": "Exported by architect/package@7.2.0 on 2022-02-25T17:07:38.324Z",
+  "Description": "Exported by architect/package@8.0.0 on 2022-02-25T17:13:02.307Z",
   "Resources": {
     "Role": {
       "Type": "AWS::IAM::Role",
@@ -118,10 +118,39 @@
           "Statement": [
             {
               "Effect": "Allow",
-              "Action": "ssm:GetParametersByPath",
+              "Action": [
+                "ssm:GetParametersByPath",
+                "ssm:GetParameter"
+              ],
               "Resource": {
                 "Fn::Sub": [
                   "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${AWS::StackName}",
+                  {}
+                ]
+              }
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "ssm:GetParametersByPath",
+                "ssm:GetParameter"
+              ],
+              "Resource": {
+                "Fn::Sub": [
+                  "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${AWS::StackName}/*",
+                  {}
+                ]
+              }
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "ssm:GetParametersByPath",
+                "ssm:GetParameter"
+              ],
+              "Resource": {
+                "Fn::Sub": [
+                  "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${AWS::StackName}/*/*",
                   {}
                 ]
               }
@@ -199,18 +228,15 @@
         "Environment": {
           "Variables": {
             "ARC_APP_NAME": "sveltekit-repro",
-            "ARC_CLOUDFORMATION": {
-              "Ref": "AWS::StackName"
-            },
             "ARC_ENV": "staging",
             "ARC_ROLE": {
               "Ref": "Role"
             },
-            "NODE_ENV": "staging",
-            "SESSION_TABLE_NAME": "jwe",
+            "ARC_SESSION_TABLE_NAME": "jwe",
             "ARC_STATIC_BUCKET": {
               "Ref": "StaticBucket"
-            }
+            },
+            "ARC_STATIC_SPA": false
           }
         },
         "Role": {
@@ -240,10 +266,49 @@
     "StaticBucket": {
       "Type": "AWS::S3::Bucket",
       "Properties": {
-        "AccessControl": "PublicRead",
+        "OwnershipControls": {
+          "Rules": [
+            {
+              "ObjectOwnership": "BucketOwnerEnforced"
+            }
+          ]
+        },
         "WebsiteConfiguration": {
           "IndexDocument": "index.html",
           "ErrorDocument": "404.html"
+        }
+      }
+    },
+    "StaticBucketPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "StaticBucket"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Action": [
+                "s3:GetObject"
+              ],
+              "Effect": "Allow",
+              "Principal": "*",
+              "Resource": [
+                {
+                  "Fn::Sub": [
+                    "arn:aws:s3:::${bukkit}/*",
+                    {
+                      "bukkit": {
+                        "Ref": "StaticBucket"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "Sid": "PublicReadGetObject"
+            }
+          ]
         }
       }
     }
