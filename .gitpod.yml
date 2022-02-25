@@ -1,0 +1,22 @@
+image: 
+  file: .gitpod.Dockerfile
+tasks:
+  - name: "Start"
+    init: "npm i"
+    command: |
+      export HMR_HOST=`gp url 24678`
+      export AWS_PROFILE=preview
+      export AWS_REGION=us-east-1
+      npm run dev
+vscode:
+  extensions:
+    - svelte.svelte-vscode
+    - bradlc.vscode-tailwindcss
+    - ms-azuretools.vscode-docker
+ports:
+  - port: 3000
+    visibility: public
+    onOpen: ignore
+  - port: 24678
+    visibility: public
+    onOpen: ignore

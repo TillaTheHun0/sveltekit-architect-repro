@@ -1,0 +1,9 @@
+.DS_Store
+node_modules
+/.svelte-kit
+/package
+.env
+.begin
+coverage
+yarn-error.log
+sam.yaml
